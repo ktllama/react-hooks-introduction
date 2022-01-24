@@ -1,43 +1,31 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import './CharPicker.css';
+import { useHttp } from '../hooks/Http'
+
+//when calling hooks you can only call on the top level function- not nested within another function
+//so we cannot call our useHttp hook inside the useEffect hook like how the data was originally fetched
+//but inside your own hook you create you can use other functions- so put useeffect in http hook to only render on load
 
 const CharPicker = (props) => {
-  const [characters, setCharacters] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(()=>{
-    console.log('use effect runs');
-    setIsLoading(true);
-      fetch('https://swapi.dev/api/people/?format=json')
-        .then(response => {
-          if (!response.ok) {
-            throw new Error('Failed to fetch.');
-          }
-          return response.json();
-        })
-        .then(charData => {
-          const selectedCharacters = charData.results.slice(0, 5);
-          setIsLoading(false);
-          setCharacters(
-            selectedCharacters.map((char, index) => ({
-              name: char.name,
-              id: index + 1
-          })))
-        })
-        .catch(err => {
-          console.log(err);
-          setIsLoading(false);
-        });
-  }, []);
+  const [isLoading, data] = useHttp('https://swapi.dev/api/people/?format=json', []);
+  //passing url and dependencies [] as arguments to our useHttp hook
+  //the hook is returning is loading and the data
+  //use array desturcturing to assign these to variables
 
-  //using empty array sets useeffect to only run on first page load- no array it will start an infinite loop
+  const selectedCharacters = data ? data.results.slice(0, 5).map((char, index) => ({
+    name: char.name,
+    id: index + 1
+  })) : [] ;
+  //just selects the first 5 characters from the data
+  //map through data to get desired info
 
     let content = <p>loading...</p>;
 
     if (
       !isLoading &&
-      characters &&
-      characters.length > 0
+      selectedCharacters &&
+      selectedCharacters.length > 0
     ) {
       content = (
         <select
@@ -45,7 +33,7 @@ const CharPicker = (props) => {
           value={props.selectedChar}
           className={props.side}
         >
-          {characters.map(char => (
+          {selectedCharacters.map(char => (
             <option key={char.id} value={char.id}>
               {char.name}
             </option>
@@ -54,7 +42,7 @@ const CharPicker = (props) => {
       );
     } else if (
       !isLoading &&
-      (!characters || characters.length === 0)
+      (!selectedCharacters || selectedCharacters.length === 0)
     ) {
       content = <p>Could not fetch any data.</p>;
     }
