@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import CharPicker from './components/CharPicker';
 import Character from './components/Character';
 
-const App = () => {
+const App = (props) => {
 
-  const [selectedCharacter, setSelectedChar] = useState('1');
+  const [selectedCharacter, setSelectedChar] = useState(1);
   const [side, setSide] = useState('light');
   const [destroyed, setDestroyed] = useState(false);
 
