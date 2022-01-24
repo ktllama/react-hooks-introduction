@@ -24,7 +24,7 @@ class App extends Component {
   };
 
   render() {
-    let content = (
+    return (
       <React.Fragment>
         <CharPicker
           side={this.state.side}
@@ -42,10 +42,6 @@ class App extends Component {
       </React.Fragment>
     );
 
-    if (this.state.destroyed) {
-      content = <h1>Total destruction!</h1>;
-    }
-    return content;
   }
 }
 

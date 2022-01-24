@@ -7,7 +7,7 @@ class CharPicker extends Component {
 
   componentDidMount() {
     this.setState({ isLoading: true });
-    fetch('https://swapi.co/api/people')
+    fetch('https://swapi.dev/api/people/?format=json')
       .then(response => {
         if (!response.ok) {
           throw new Error('Failed to fetch.');
@@ -30,7 +30,7 @@ class CharPicker extends Component {
   }
 
   render() {
-    let content = <p>Loading characters...</p>;
+    let content = <p>loading...</p>;
 
     if (
       !this.state.isLoading &&
