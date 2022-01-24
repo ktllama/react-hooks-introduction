@@ -1,37 +1,18 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import Summary from './Summary';
 
-class Character extends Component {
-  state = { loadedCharacter: {}, isLoading: false };
+const Character = (props) => {
+  const [ loadedCharacter, setLoadedCharacter ] = useState({});
+  const [ isLoading, setIsLoading ] = useState(false);
 
-  shouldComponentUpdate(nextProps, nextState) {
-    console.log('shouldComponentUpdate');
-    return (
-      nextProps.selectedChar !== this.props.selectedChar ||
-      nextState.loadedCharacter.id !== this.state.loadedCharacter.id ||
-      nextState.isLoading !== this.state.isLoading
-    );
-  }
-
-  componentDidUpdate(prevProps) {
-    console.log('Component did update');
-    if (prevProps.selectedChar !== this.props.selectedChar) {
-      this.fetchData();
-    }
-  }
-
-  componentDidMount() {
-    this.fetchData();
-  }
-
-  fetchData = () => {
+  const fetchData = () => {
     console.log(
       'Sending Http request for new character with id ' +
-        this.props.selectedChar
+        props.selectedChar
     );
-    this.setState({ isLoading: true });
-    fetch('https://swapi.dev/api/people/' + this.props.selectedChar)
+    setIsLoading(true);
+    fetch('https://swapi.dev/api/people/' + props.selectedChar)
       .then(response => {
         if (!response.ok) {
           throw new Error('Could not fetch person!');
@@ -40,7 +21,7 @@ class Character extends Component {
       })
       .then(charData => {
         const loadedCharacter = {
-          id: this.props.selectedChar,
+          id: props.selectedChar,
           name: charData.name,
           height: charData.height,
           colors: {
@@ -50,36 +31,49 @@ class Character extends Component {
           gender: charData.gender,
           movieCount: charData.films.length
         };
-        this.setState({ loadedCharacter: loadedCharacter, isLoading: false });
+        setLoadedCharacter(loadedCharacter);
+        setIsLoading(false);
       })
       .catch(err => {
         console.log(err);
       });
   };
 
-  componentWillUnmount() {
-    console.log('Too soon...');
-  }
+  useEffect(() => {
+    fetchData();
+    return () => {
+      console.log('useeffect clean up function')
+    };
+  }, [props.selectedChar]);
+  //this will run the useEffect to fetch the data everytime props.selectedChar changes as well as fetch the data for the first render
+  
+  useEffect(() => {
+    return () => {
+      console.log('component did unmount')
+    };
+  }, []);
+  //for the clean up for things like event listeners and such you can run the return and annonymous function, you can also run an anon. function in a useeffect alone with no other code to run the clean up when the component unmounts
 
-  render() {
     let content = <p>Loading Character...</p>;
 
-    if (!this.state.isLoading && this.state.loadedCharacter.id) {
+    if (!isLoading && loadedCharacter.id) {
       content = (
         <Summary
-          name={this.state.loadedCharacter.name}
-          gender={this.state.loadedCharacter.gender}
-          height={this.state.loadedCharacter.height}
-          hairColor={this.state.loadedCharacter.colors.hair}
-          skinColor={this.state.loadedCharacter.colors.skin}
-          movieCount={this.state.loadedCharacter.movieCount}
+          name={loadedCharacter.name}
+          gender={loadedCharacter.gender}
+          height={loadedCharacter.height}
+          hairColor={loadedCharacter.colors.hair}
+          skinColor={loadedCharacter.colors.skin}
+          movieCount={loadedCharacter.movieCount}
         />
       );
-    } else if (!this.state.isLoading && !this.state.loadedCharacter.id) {
+    } else if (!isLoading && !loadedCharacter.id) {
       content = <p>Failed to fetch character.</p>;
     }
     return content;
-  }
 }
 
-export default Character;
+export default React.memo(Character);
+
+//react.memo will store this component and will only rerender it when props change/ input changes
+//replacemnt for should component update- but react detects which props change and should trigger an update now
