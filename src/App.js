@@ -4,44 +4,46 @@ import Character from './components/Character';
 
 const App = () => {
 
-  const [state, setState] =useState({
-    selectedCharacter: 1,
-    side: 'light',
-    destroyed: false
-  })
+  const [selectedCharacter, setSelectedChar] = useState('1');
+  const [side, setSide] = useState('light');
+  const [destroyed, setDestroyed] = useState(false);
 
   const sideHandler = side => {
-      setState({ ...state, side: side });
+      setSide(side);
     };
     //use spread here to change just the side and not override entire state
 
   const charSelectHandler = event => {
       const charId = event.target.value;
-      //console.log(event.target.value);
-      setState({ ...state, selectedCharacter: charId });
+      setSelectedChar(charId);
     };
 
   const destructionHandler = () => {
-      setState({ ...state, destroyed: true });
+      setDestroyed(true);
     };
 
-    return (
+    let content = (
       <>
         <CharPicker
-          side={state.side}
-          selectedChar={state.selectedCharacter}
+          side={side}
+          selectedChar={selectedCharacter}
           onCharSelect={charSelectHandler}
         />
-        <Character selectedChar={state.selectedCharacter} />
+        <Character selectedChar={selectedCharacter} />
         <button onClick={sideHandler.bind(this, 'light')}>
           Light Side
         </button>
         <button onClick={sideHandler.bind(this, 'dark')}>Dark Side</button>
-        {state.side === 'dark' && (
+        {side === 'dark' && (
           <button onClick={destructionHandler}>DESTROY!</button>
         )}
       </>
-    );
+     );
+
+     if (destroyed) {
+       content = <h1> DESTROYED!</h1>
+     }
+     return content;
 };
 
 export default App;
